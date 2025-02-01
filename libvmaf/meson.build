@@ -28,17 +28,27 @@ elif host_machine.system() == 'darwin'
     add_project_arguments('-D_DARWIN_C_SOURCE', language: ['c', 'cpp'])
 endif
 
+if cc.get_id() == 'msvc'
+    # MSVC has added support for lock-free atomics (sizeof(T) <= sizeof(intptr_t))
+    # Note that __STDC_NO_ATOMICS__ remains defined
+    test_args += '/experimental:c11atomics'
+    add_project_arguments('/experimental:c11atomics', language: 'c')
+endif
+
 # Header checks
-stdatomic_dependency = []
-if not cc.check_header('stdatomic.h')
+if cc.check_header('stdatomic.h', args: test_args)
+    stdatomic_dependency = declare_dependency(compile_args: '-DHAVE_STDATOMIC_H')
+else
     if cc.get_id() == 'msvc'
-        # we have a custom replacement for MSVC
+        # we have a custom replacement for MSVC before /experimental:c11atomics was added
         stdatomic_dependency = declare_dependency(
+            compile_args : '-DHAVE_STDATOMIC_H',
             include_directories : include_directories('src/compat/msvc'),
         )
     elif cc.compiles('''int main() { int v = 0; return __atomic_fetch_add(&v, 1, __ATOMIC_SEQ_CST); }''',
                      name : 'GCC-style atomics', args : test_args)
         stdatomic_dependency = declare_dependency(
+            compile_args : '-DHAVE_STDATOMIC_H',
             include_directories : include_directories('src/compat/gcc'),
         )
     else

@@ -23,10 +23,12 @@ jobs:
           #- os: ubuntu-latest
           #  CC: ccache clang
           #  CXX: ccache clang++
-          #- os: macos-latest
-          #  CC: ccache clang
-          #  CXX: ccache clang++
-          #  experimental: true
+          - os: macos-latest
+            cc: clang
+            cxx: clang++
+            sudo: sudo
+            ccache: ccache
+            experimental: true
           - os: windows-latest
             cc: cl
             cxx: cl
@@ -35,6 +37,7 @@ jobs:
     env:
       CC: ${{ matrix.ccache }} ${{ matrix.cc }}
       CXX: ${{ matrix.ccache }} ${{ matrix.cxx }}
+      CPP: ${{ matrix.ccache }} ${{ matrix.cxx }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup python
@@ -75,13 +78,13 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew install -q ninja nasm ccache llvm
-          echo "name=PATH::$(brew --prefix)/opt/bin:$PATH" >> $GITHUB_ENV
+          echo "PATH=$(brew --prefix)/opt/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: |
           choco install visualstudio2022buildtools visualstudio2022-workload-vctools meson nasm -y -r
-          "name=PATH::C:\Program Files\Meson;C:\Program Files\NASM;$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
+          "PATH=C:\Program Files\Meson;C:\Program Files\NASM;$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
 
       - uses: actions/checkout@v4
       - name: Configure

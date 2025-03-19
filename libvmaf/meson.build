@@ -50,7 +50,7 @@ if cc.has_header('stdatomic.h', args: test_args)
         # Note that __STDC_NO_ATOMICS__ remains defined due to lack of locking atomics
         test_args += '/experimental:c11atomics'
 
-        if !cc.check_header('stdatomic.h', args: test_args)
+        if not cc.check_header('stdatomic.h', args: test_args)
             error('stdatomic.h exists but could not be made usable under MSVC with /experimental:c11atomics')
         endif
 

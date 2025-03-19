@@ -84,10 +84,13 @@ jobs:
 
           Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
           refreshenv
-          $CC | Out-Null
+          $CC
+          Write-Host -NoNewLine 'Meson version '
           meson --version
+          Write-Host -NoNewLine 'Ninja version '
           ninja --version
-          nasm --version
+          gci -Recurse \ -Filter nasm.exe
+          #nasm --version
 
       - uses: actions/checkout@v4
       - name: Run meson

@@ -30,6 +30,11 @@ jobs:
           - os: windows-latest
             cc: cl
             cxx: cl
+            sudo:
+            ccache:
+    env:
+      CC: ${{ matrix.ccache }} ${{ matrix.cc }}
+      CXX: ${{ matrix.ccache }} ${{ matrix.cxx }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup python
@@ -87,10 +92,10 @@ jobs:
           ninja -vC libvmaf/build
       - name: Run tests
         run: |
-          ${{ sudo }} ninja -vC libvmaf/build test
+          ninja -vC libvmaf/build test
       - name: Install
         run: |
-          ninja -vC libvmaf/build install
+          ${{ matrix.sudo }} ninja -vC libvmaf/build install
       - name: Set up tox
         run: |
           pip install tox

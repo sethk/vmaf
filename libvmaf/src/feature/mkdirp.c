@@ -6,8 +6,8 @@
 // MIT licensed
 //
 
-#ifdef _WIN32
-#include <windows.h>
+#ifdef HAVE_DIRECT_H
+#include <direct.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

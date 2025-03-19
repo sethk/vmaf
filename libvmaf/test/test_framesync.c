@@ -18,9 +18,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#ifdef _WIN32
-#include <windows.h>
-#endif
+#include <stdlib.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

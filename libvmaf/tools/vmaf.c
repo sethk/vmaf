@@ -2,7 +2,6 @@
 #include <string.h>
 #include <time.h>
 #ifdef _WIN32
-#include <windows.h>
 #include <corecrt_io.h> // isatty()
 #endif
 #ifdef HAVE_MALLOC_H

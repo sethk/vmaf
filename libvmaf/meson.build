@@ -32,6 +32,9 @@ endif
 if cc.has_header('alloca.h', args: test_args)
     add_project_arguments('-DHAVE_ALLOCA_H', language: ['c', 'cpp'])
 endif
+if cc.has_header('direct.h', args: test_args)
+    add_project_arguments('-DHAVE_DIRECT_H', language: ['c', 'cpp'])
+endif
 
 stdatomic_dependency = []
 if cc.has_header('stdatomic.h', args: test_args)

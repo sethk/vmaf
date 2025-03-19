@@ -20,7 +20,7 @@
 
 #include <stdarg.h>
 #ifdef _WIN32
-#include <windows.h>
+#include <corecrt_io.h> // isatty()
 #endif
 #if HAVE_UNISTD_H
 #include <unistd.h>

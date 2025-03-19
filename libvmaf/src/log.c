@@ -34,7 +34,7 @@ void vmaf_set_log_level(enum VmafLogLevel level)
     level = level < VMAF_LOG_LEVEL_NONE ? VMAF_LOG_LEVEL_NONE : level;
     level = level > VMAF_LOG_LEVEL_DEBUG ? VMAF_LOG_LEVEL_DEBUG : level;
     vmaf_log_level = level;
-    istty = isatty(_fileno(stderr));
+    istty = isatty(fileno(stderr));
 }
 
 static const char *level_str[] = {

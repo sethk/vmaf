@@ -1,7 +1,7 @@
 name: ffmpeg
-on:
-  push:
-  pull_request:
+#on:
+#  push:
+#  pull_request:
 
 env:
   DEBIAN_FRONTEND: noninteractive

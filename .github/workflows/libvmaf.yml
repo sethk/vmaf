@@ -1,6 +1,6 @@
 name: libvmaf
-#on:
-#  push:
+on:
+  push:
 #  pull_request:
 
 env:
@@ -12,19 +12,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            CC: ccache gcc
-            CXX: ccache g++
-          - os: ubuntu-latest
-            CC: ccache gcc-9
-            CXX: ccache g++-9
-          - os: ubuntu-latest
-            CC: ccache clang
-            CXX: ccache clang++
-          - os: macos-latest
-            CC: ccache clang
-            CXX: ccache clang++
-            experimental: true
+          #- os: ubuntu-latest
+          #  CC: ccache gcc
+          #  CXX: ccache g++
+          #- os: ubuntu-latest
+          #  CC: ccache gcc-9
+          #  CXX: ccache g++-9
+          #- os: ubuntu-latest
+          #  CC: ccache clang
+          #  CXX: ccache clang++
+          #- os: macos-latest
+          #  CC: ccache clang
+          #  CXX: ccache clang++
+          #  experimental: true
           - os: windows-latest
             CC: cl.exe
             CXX: cl.exe

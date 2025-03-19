@@ -1,7 +1,7 @@
 name: libvmaf
-on:
-  push:
-  pull_request:
+#on:
+#  push:
+#  pull_request:
 
 env:
   DEBIAN_FRONTEND: noninteractive
@@ -82,6 +82,7 @@ jobs:
           choco install ninja
           choco install nasm
 
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
           refreshenv
           $CC | Out-Null
           meson --version

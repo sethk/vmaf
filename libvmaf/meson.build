@@ -22,13 +22,6 @@ libvmaf_inc = include_directories(['include'])
 test_args = ['-D_GNU_SOURCE', '-D_USE_MATH_DEFINES']
 add_project_arguments(test_args, language: ['c', 'cpp'])
 
-if cc.get_id() == 'msvc'
-    # MSVC has added support for lock-free atomics (sizeof(T) <= sizeof(intptr_t))
-    # Note that __STDC_NO_ATOMICS__ remains defined
-    test_args += '/experimental:c11atomics'
-    add_project_arguments('/experimental:c11atomics', language: 'c')
-endif
-
 # Header checks
 if cc.has_header('unistd.h', args: test_args)
     add_project_arguments('-DHAVE_UNISTD_H', language: ['c', 'cpp'])

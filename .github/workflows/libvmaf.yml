@@ -32,6 +32,7 @@ jobs:
           - os: windows-latest
             cc: cl
             cxx: cl
+            msvc_version: 14.43.34808
             sudo:
             ccache:
     env:
@@ -86,9 +87,9 @@ jobs:
           & choco install visualstudio2022buildtools visualstudio2022-workload-vctools meson nasm -y -r
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
           $VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          $MSVCDir = "$VSDir\VC\Tools\MSVC"
-          gci $MSVCDir
-          "PATH=C:\Program Files\Meson;C:\Program Files\NASM;$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
+          $MSVCDir = "$VSDir\VC\Tools\MSVC\${{ matrix.msvc_version }}"
+          $MSVCBinDir = "$MSVCDir\bin\Hostx64\x64"
+          "PATH=C:\Program Files\Meson;C:\Program Files\NASM;$MSVCBinDir;$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
 
       - uses: actions/checkout@v4
       - name: Configure

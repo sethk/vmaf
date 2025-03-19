@@ -12,9 +12,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          #- os: ubuntu-latest
-          #  CC: ccache gcc
-          #  CXX: ccache g++
+          - os: ubuntu-latest
+            cc: gcc
+            cxx: g++
+            sudo: sudo
+            ccache: ccache
           #- os: ubuntu-latest
           #  CC: ccache gcc-9
           #  CXX: ccache g++-9
@@ -26,12 +28,9 @@ jobs:
           #  CXX: ccache clang++
           #  experimental: true
           - os: windows-latest
-            CC: cl.exe
-            CXX: cl.exe
+            cc: cl
+            cxx: cl
     runs-on: ${{ matrix.os }}
-    env:
-      CC: ${{ matrix.CC }}
-      CXX: ${{ matrix.CXX }}
     steps:
       - name: Setup python
         uses: actions/setup-python@v5
@@ -50,72 +49,53 @@ jobs:
         run: |
           sudo apt-get update
           sudo -E apt-get -yq install ccache ninja-build libomp-dev
-          case "$CC" in
-          *gcc) sudo -E apt-get -yq install gcc g++ nasm ;;
-          *gcc-9)
-            sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
-            sudo -E apt-get -yq install gcc-9 g++-9 nasm
-            ;;
-          *clang) sudo -E apt-get -yq install clang nasm ;;
-          esac
-          $CC --version
-          ccache --version
-          ninja --version
-          nasm --version
+
+      - name: Install gcc (ubuntu)
+        if: matrix.os == 'ubuntu-latest' && matrix.cc == 'gcc'
+        run: |
+          sudo -E apt-get -yq install gcc g++ nasm
+
+      - name: Install gcc-9 (ubuntu)
+        if: matrix.os == 'ubuntu-latest' && matrix.cc == 'gcc-9'
+        run: |
+          sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
+          sudo -E apt-get -yq install gcc-9 g++-9 nasm
+
+      - name: Install clang (ubuntu)
+        if: matrix.os == 'ubuntu-latest' && matrix.cc == 'clang'
+        run: |
+          sudo -E apt-get -yq install clang nasm
 
       - name: Install dependencies (mac)
         if: matrix.os == 'macos-latest'
         run: |
           brew install -q ninja nasm ccache llvm
-
-          $CC --version
-          ccache --version
-          ninja --version
-          nasm --version
+          echo "name=PATH::$(brew --prefix)/opt/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: |
-          choco install visualstudio2022buildtools -y -r
-          choco install visualstudio2022-workload-vctools -y -r
-          choco install meson
-          choco install ninja
-          choco install nasm
-
-          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-          refreshenv
-          $CC
-          Write-Host -NoNewLine 'Meson version '
-          meson --version
-          Write-Host -NoNewLine 'Ninja version '
-          ninja --version
-          gci -Recurse \ -Filter nasm.exe
-          #nasm --version
+          choco install visualstudio2022buildtools visualstudio2022-workload-vctools meson nasm -y -r
+          "name=PATH::C:\Program Files\Meson;C:\Program Files\NASM;$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
 
       - uses: actions/checkout@v4
-      - name: Run meson
+      - name: Configure
         run: |
           meson setup libvmaf libvmaf/build --buildtype release --prefix $PWD/install -Denable_float=true
-      - name: Run ninja
+      - name: Build
         run: |
-          sudo ninja -vC libvmaf/build install
+          ninja -vC libvmaf/build
       - name: Run tests
         run: |
-          sudo ninja -vC libvmaf/build test
+          ${{ sudo }} ninja -vC libvmaf/build test
+      - name: Install
+        run: |
+          ninja -vC libvmaf/build install
       - name: Set up tox
         run: |
-          mkdir -p ~/.ccache && sudo chown -R $(whoami) ~/.ccache
           pip install tox
-      - name: Run tox tests (ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Run tox tests
         run: |
-          tox -c python
-      - name: Run tox tests (mac)
-        if: matrix.os == 'macos-latest'
-        run: |
-          PATH=$(brew --prefix)/opt/llvm/bin:$PATH \
-          CC=$(brew --prefix)/opt/llvm/bin/clang \
-          CXX=$(brew --prefix)/opt/llvm/bin/clang++ \
           tox -c python
 
       - name: Get binary path & Current Release
@@ -128,7 +108,7 @@ jobs:
       - name: Upload vmaf
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-${{ matrix.CC }}-vmaf
+          name: ${{ matrix.os }}-${{ matrix.cc }}-vmaf
           path: ${{ steps.get_info.outputs.path }}
       - name: Upload vmaf
         if: steps.get_info.outputs.upload_url != 'null'

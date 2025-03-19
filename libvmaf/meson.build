@@ -30,9 +30,18 @@ if cc.get_id() == 'msvc'
 endif
 
 # Header checks
-if cc.check_header('stdatomic.h', args: test_args)
-    stdatomic_dependency = declare_dependency(compile_args: '-DHAVE_STDATOMIC_H')
-else
+if cc.has_header('unistd.h', args: test_args)
+    add_project_arguments('-DHAVE_UNISTD_H', language: ['c', 'cpp'])
+endif
+if cc.has_header('malloc.h', args: test_args)
+    add_project_arguments('-DHAVE_MALLOC_H', language: ['c', 'cpp'])
+endif
+if cc.has_header('alloca.h', args: test_args)
+    add_project_arguments('-DHAVE_ALLOCA_H', language: ['c', 'cpp'])
+endif
+
+stdatomic_dependency = []
+if not cc.check_header('stdatomic.h')
     if cc.get_id() == 'msvc'
         # we have a custom replacement for MSVC before /experimental:c11atomics was added
         stdatomic_dependency = declare_dependency(

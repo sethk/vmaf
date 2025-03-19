@@ -76,12 +76,13 @@ jobs:
       - name: Install dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: |
-          choco install visualstudio2022buildtools --version=17.0.0 --pre
-          choco install visualstudio2022-workload-vctools --version=17.0.0 --pre
+          choco install visualstudio2022buildtools -y -r
+          choco install visualstudio2022-workload-vctools -y -r
           choco install meson
           choco install ninja
           choco install nasm
 
+          refreshenv
           $CC | Out-Null
           meson --version
           ninja --version

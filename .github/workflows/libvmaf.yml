@@ -85,14 +85,14 @@ jobs:
       - name: Install dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: |
-          #& choco install visualstudio2022buildtools visualstudio2022-workload-vctools windows-sdk-10 meson nasm -y -r
-          #$VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
-          #$VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          #$MSVCDir = "$VSDir\VC\Tools\MSVC\${{ matrix.msvc_version }}"
-          #$MSVCBinDir = "$MSVCDir\bin\Hostx64\x64"
-          choco install windows-sdk-10 -y -r
-          $Win10SDKDir = (Get-ChildItem 'HKLM:/SOFTWARE/Microsoft/Windows Kits/Installed Roots/KitsRoot10').Value
-          gci $Win10SDKDir
+          & choco install visualstudio2022buildtools visualstudio2022-workload-vctools windows-sdk-10.0 meson nasm -y -r
+          $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
+          $VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          $MSVCDir = "$VSDir\VC\Tools\MSVC\${{ matrix.msvc_version }}"
+          $MSVCBinDir = "$MSVCDir\bin\Hostx64\x64"
+          $Win10SDKDir = "C:\Program Files (x86)\Windows Kits\10"
+          "LIB=$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}" | Out-File -Append $Env:GITHUB_ENV
+          "INCLUDE=$Win10SDKDir\Include\${{ matrix.win_sdk_version }}" | Out-File -Append $Env:GITHUB_ENV
           "PATH=C:\Program Files\Meson;C:\Program Files\NASM;$MSVCBinDir;$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
 
       - uses: actions/checkout@v4

@@ -91,8 +91,8 @@ jobs:
           $MSVCDir = "$VSDir\VC\Tools\MSVC\${{ matrix.msvc_version }}"
           $MSVCBinDir = "$MSVCDir\bin\Hostx64\x64"
           $Win10SDKDir = "C:\Program Files (x86)\Windows Kits\10"
-          "LIB=$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}" | Out-File -Append $Env:GITHUB_ENV
-          "INCLUDE=$Win10SDKDir\Include\${{ matrix.win_sdk_version }}" | Out-File -Append $Env:GITHUB_ENV
+          "LIB=$Win10SDKDir\Lib\${{ matrix.win_sdk_version }};$MSVCDir\lib\x64" | Out-File -Append $Env:GITHUB_ENV
+          "INCLUDE=$Win10SDKDir\Include\${{ matrix.win_sdk_version }};$MSVCDir\include" | Out-File -Append $Env:GITHUB_ENV
           "PATH=C:\Program Files\Meson;C:\Program Files\NASM;$MSVCBinDir;$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
 
       - uses: actions/checkout@v4

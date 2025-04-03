@@ -90,10 +90,18 @@ jobs:
           $VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
           $MSVCDir = "$VSDir\VC\Tools\MSVC\${{ matrix.msvc_version }}"
           $MSVCBinDir = "$MSVCDir\bin\Hostx64\x64"
+          $Env:PATH = "C:\Program Files\Meson;C:\Program Files\NASM;$MSVCBinDir;$Env:PATH"
+          $Env:LIB = "$MSVCDir\lib\x64"
+          $Env:INCLUDE = "$MSVCDir\include"
           $Win10SDKDir = "C:\Program Files (x86)\Windows Kits\10"
-          "LIB=$Win10SDKDir\Lib\${{ matrix.win_sdk_version }};$MSVCDir\lib\x64" | Out-File -Append $Env:GITHUB_ENV
-          "INCLUDE=$Win10SDKDir\Include\${{ matrix.win_sdk_version }};$MSVCDir\include" | Out-File -Append $Env:GITHUB_ENV
-          "PATH=C:\Program Files\Meson;C:\Program Files\NASM;$MSVCBinDir;$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
+          $Env:LIB += ";$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}\um\x64"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\um"
+          $Env:LIB += ";$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}\ucrt\x64"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\ucrt"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\shared"
+          "LIB=$Env:LIB" | Out-File -Append $Env:GITHUB_ENV
+          "INCLUDE=$Env:INCLUDE" | Out-File -Append $Env:GITHUB_ENV
+          "PATH=$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
 
       - uses: actions/checkout@v4
       - name: Configure

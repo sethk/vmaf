@@ -85,6 +85,9 @@ jobs:
       - name: Install dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: |
+          Invoke-WebRequest -OutFile pthreads-win32.zip -Uri 'http://mirrors.kernel.org/sourceware/pthreads-win32/pthreads-w32-2-9-1-release.zip'
+          Expand-Archive -Path pthreads-win32.zip -Destination pthreads-win32
+          Get-ChildItem -Recurse pthreads-win32
           & choco install visualstudio2022buildtools visualstudio2022-workload-vctools windows-sdk-10.0 meson nasm -y -r
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
           $VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
@@ -99,6 +102,8 @@ jobs:
           $Env:LIB += ";$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}\ucrt\x64"
           $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\ucrt"
           $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\shared"
+          $Env:INCLUDE+= ";pthreads-win32\Pre-built.2\include"
+          $Env:LIB+= ";pthreads-win32\Pre-built.2\lib\x64"
           "LIB=$Env:LIB" | Out-File -Append $Env:GITHUB_ENV
           "INCLUDE=$Env:INCLUDE" | Out-File -Append $Env:GITHUB_ENV
           "PATH=$Env:PATH" | Out-File -Append $Env:GITHUB_ENV

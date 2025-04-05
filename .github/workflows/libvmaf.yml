@@ -102,6 +102,8 @@ jobs:
           Invoke-WebRequest -OutFile pthreads-win32.zip -Uri 'http://mirrors.kernel.org/sourceware/pthreads-win32/pthreads-w32-2-9-1-release.zip'
           Expand-Archive -Path pthreads-win32.zip -Destination pthreads-win32
           $PThreadsDir = Join-Path (Get-Location) 'pthreads-win32\Pre-built.2'
+          Write-Host "PThreadsDir is $PThreadsDir"
+          gci -Recurse $PThreadsDir
           $Env:INCLUDE+= ";$PThreadsDir\include"
           $Env:LIB+= ";$PThreadsDir\lib\x64"
           "LIB=$Env:LIB" | Out-File -Append $Env:GITHUB_ENV

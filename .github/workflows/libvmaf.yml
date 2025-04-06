@@ -103,10 +103,9 @@ jobs:
           $PThreadsPrefix = 'C:\Program Files\pthreads-win32'
           Expand-Archive -Path pthreads-win32.zip -Destination $PThreadsPrefix
           $PThreadsDir = Join-Path $PThreadsPrefix '\Pre-built.2'
-          Write-Host "PThreadsDir is $PThreadsDir"
-          gci -Recurse $PThreadsDir
           $Env:INCLUDE+= ";$PThreadsDir\include"
           $Env:LIB+= ";$PThreadsDir\lib\x64"
+          $Env:PATH+= ";$PThreadsDir\dll\x64
           "LIB=$Env:LIB" | Out-File -Append $Env:GITHUB_ENV
           "INCLUDE=$Env:INCLUDE" | Out-File -Append $Env:GITHUB_ENV
           "PATH=$Env:PATH" | Out-File -Append $Env:GITHUB_ENV

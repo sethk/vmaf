@@ -369,7 +369,7 @@ endif
 if host_machine.system() == 'windows' and cc.get_id() == 'msvc'
   # We require pthreads-win32, not native threading via kernel32.dll, which is what dependency('threads') gives us.
   # The dirs must be added to %LIB% and %INCLUDE%
-  thread_lib = cc.find_library('pthreadVC2.lib', has_headers: ['pthread.h'], required : true)
+  thread_lib = cc.find_library('pthreadVC2', has_headers: ['pthread.h'], required : true)
 else
   thread_lib = dependency('threads')
 endif

@@ -100,8 +100,9 @@ jobs:
           $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\ucrt"
           $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\shared"
           Invoke-WebRequest -OutFile pthreads-win32.zip -Uri 'http://mirrors.kernel.org/sourceware/pthreads-win32/pthreads-w32-2-9-1-release.zip'
-          Expand-Archive -Path pthreads-win32.zip -Destination pthreads-win32
-          $PThreadsDir = Join-Path (Get-Location) 'pthreads-win32\Pre-built.2'
+          $PThreadsPrefix = 'C:\Program Files\pthreads-win32'
+          Expand-Archive -Path pthreads-win32.zip -Destination $PThreadsPrefix
+          $PThreadsDir = Join-Path $PThreadsPrefix '\Pre-built.2'
           Write-Host "PThreadsDir is $PThreadsDir"
           gci -Recurse $PThreadsDir
           $Env:INCLUDE+= ";$PThreadsDir\include"

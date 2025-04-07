@@ -105,8 +105,10 @@ jobs:
         with:
           key: ${{ runner.os }}-deps-choco-${{ hashFiles('.github/choco/windows-vs2022.config') }}-1
           path: |
-            C:\Program Files (x86)
-            C:\Program Files
+            C:\Program Files (x86)\Microsoft Visual Studio
+            C:\Program Files\Microsoft Visual Studio
+            C:\Program Files (x86)\Windows Kits
+            C:\Program Files\NASM
 
       - name: Install Chocolatey dependencies (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages && steps.restore-choco-deps.outputs.cache-hit != 'true'
@@ -119,8 +121,10 @@ jobs:
         with:
           key: ${{ steps.restore-choco-deps.outputs.cache-primary-key }}
           path: |
-            C:\Program Files (x86)
-            C:\Program Files
+            C:\Program Files (x86)\Microsoft Visual Studio
+            C:\Program Files\Microsoft Visual Studio
+            C:\Program Files (x86)\Windows Kits
+            C:\Program Files\NASM
 
       - name: Set up build environment (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages

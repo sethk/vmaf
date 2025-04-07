@@ -99,7 +99,7 @@ jobs:
         id: restore-choco-deps
         uses: actions/cache/restore@v4
         with:
-          key: ${{ runner.os }}-deps-choco-${{ hashFiles('.github\actions\choco\windows-vs2022.config') }}-1
+          key: ${{ runner.os }}-deps-choco-${{ hashFiles('.github/actions/choco/windows-vs2022.config') }}-1
           path: |
             C:\Program Files (x86)
             C:\Program Files

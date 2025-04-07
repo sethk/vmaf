@@ -109,6 +109,7 @@ jobs:
             C:\Program Files\Microsoft Visual Studio
             C:\Program Files (x86)\Windows Kits
             C:\Program Files\NASM
+            C:\Program Files\Meson
 
       - name: Install Chocolatey dependencies (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages && steps.restore-choco-deps.outputs.cache-hit != 'true'
@@ -125,8 +126,9 @@ jobs:
             C:\Program Files\Microsoft Visual Studio
             C:\Program Files (x86)\Windows Kits
             C:\Program Files\NASM
+            C:\Program Files\Meson
 
-      - name: Set up build environment (windows, cached)
+      - name: Set up build envMSVC: Experiment with GitHub action (30)ironment (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages
         run: |
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'

@@ -34,14 +34,26 @@ jobs:
             cxx: cl
             msvc_version: 14.43.34808
             win_sdk_version: 10.0.22000.0
+            cache_packages: false
             sudo:
             ccache:
+          - os: windows-latest
+            cc: cl
+            cxx: cl
+            msvc_version: 14.43.34808
+            win_sdk_version: 10.0.22000.0
+            cache_packages: true
+            sudo:
+            ccache:
+
     env:
       CC: ${{ matrix.ccache }} ${{ matrix.cc }}
       CXX: ${{ matrix.ccache }} ${{ matrix.cxx }}
       CPP: ${{ matrix.ccache }} ${{ matrix.cxx }}
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: Setup python
         uses: actions/setup-python@v5
         with:
@@ -82,16 +94,58 @@ jobs:
           brew install -q ninja nasm ccache llvm
           echo "PATH=$(brew --prefix)/opt/llvm/bin:$PATH" >> $GITHUB_ENV
 
-      - name: Install dependencies (windows, uncached)
-        if: matrix.os == 'windows-latest'
-        run: |
-          & choco install visualstudio2022buildtools visualstudio2022-workload-vctools windows-sdk-10.0 meson nasm -y -r
-          & choco export --include-version-numbers
-          Get-Content packages.config
-          Exit 1
+      - name: Restore Chocolatey dependencies (windows, cached)
+        if: matrix.os == 'windows-latest' && matrix.cache_packages == 'true'
+        id: restore-choco-deps
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ runner.os }}-deps-choco-${{ hashFiles('.github\actions\choco\windows-vs2022.config') }}-1
+          path: |
+            C:\Program Files (x86)
+            C:\Program Files
 
-      - name: Install dependencies (windows)
-        if: matrix.os == 'windows-latest'
+      - name: Install Chocolatey dependencies (windows, cached)
+        if: matrix.os == 'windows-latest' && matrix.cache_packages == 'true' && ${{ steps.restore-choco-deps.outputs.cache-hit != 'true' }}
+          & choco install visualstudio2022buildtools visualstudio2022-workload-vctools windows-sdk-10.0 meson nasm -y -r
+
+      - name: Save Chocolatey dependencies (windows, cached)
+        if: matrix.os == 'windows-latest' && matrix.cache_packages == 'true' && ${{ steps.restore-choco-deps.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@4
+        with:
+          key: ${{ steps.restore-deps.outputs.cache-primary-key }}
+          path: |
+            C:\Program Files (x86)
+            C:\Program Files
+
+      - name: Set up build environment (windows, cached)
+        if: matrix.os == 'windows-latest' && matrix.cache_packages == 'true'
+        run: |
+          $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
+          $VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          $MSVCDir = "$VSDir\VC\Tools\MSVC\${{ matrix.msvc_version }}"
+          $MSVCBinDir = "$MSVCDir\bin\Hostx64\x64"
+          $Env:PATH = "C:\Program Files\Meson;C:\Program Files\NASM;$MSVCBinDir;$Env:PATH"
+          $Env:LIB = "$MSVCDir\lib\x64"
+          $Env:INCLUDE = "$MSVCDir\include"
+          $Win10SDKDir = "C:\Program Files (x86)\Windows Kits\10"
+          $Env:LIB += ";$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}\um\x64"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\um"
+          $Env:LIB += ";$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}\ucrt\x64"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\ucrt"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\shared"
+          Invoke-WebRequest -OutFile pthreads-win32.zip -Uri 'http://mirrors.kernel.org/sourceware/pthreads-win32/pthreads-w32-2-9-1-release.zip'
+          $PThreadsPrefix = 'C:\Program Files\pthreads-win32'
+          Expand-Archive -Path pthreads-win32.zip -Destination $PThreadsPrefix
+          $PThreadsDir = Join-Path $PThreadsPrefix '\Pre-built.2'
+          $Env:INCLUDE+= ";$PThreadsDir\include"
+          $Env:LIB+= ";$PThreadsDir\lib\x64"
+          $Env:PATH+= ";$PThreadsDir\dll\x64"
+          "LIB=$Env:LIB" | Out-File -Append $Env:GITHUB_ENV
+          "INCLUDE=$Env:INCLUDE" | Out-File -Append $Env:GITHUB_ENV
+          "PATH=$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
+
+      - name: Install dependencies (windows, uncached)
+        if: matrix.os == 'windows-latest' && matrix.cache_packages == 'false'
         run: |
           & choco install visualstudio2022buildtools visualstudio2022-workload-vctools windows-sdk-10.0 meson nasm -y -r
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
@@ -118,7 +172,6 @@ jobs:
           "INCLUDE=$Env:INCLUDE" | Out-File -Append $Env:GITHUB_ENV
           "PATH=$Env:PATH" | Out-File -Append $Env:GITHUB_ENV
 
-      - uses: actions/checkout@v4
       - name: Configure
         run: |
           meson setup libvmaf libvmaf/build --buildtype release --prefix $PWD/install -Denable_float=true

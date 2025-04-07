@@ -82,6 +82,14 @@ jobs:
           brew install -q ninja nasm ccache llvm
           echo "PATH=$(brew --prefix)/opt/llvm/bin:$PATH" >> $GITHUB_ENV
 
+      - name: Install dependencies (windows, uncached)
+        if: matrix.os == 'windows-latest'
+        run: |
+          & choco install visualstudio2022buildtools visualstudio2022-workload-vctools windows-sdk-10.0 meson nasm -y -r
+          & choco export --include-version-numbers
+          Get-Content packages.config
+          Exit 1
+
       - name: Install dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: |

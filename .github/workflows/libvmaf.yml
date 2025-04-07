@@ -111,7 +111,7 @@ jobs:
 
       - name: Save Chocolatey dependencies (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages == 'true' && ${{ steps.restore-choco-deps.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@4
+        uses: actions/cache/save@v4
         with:
           key: ${{ steps.restore-deps.outputs.cache-primary-key }}
           path: |

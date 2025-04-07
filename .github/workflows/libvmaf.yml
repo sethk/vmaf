@@ -128,7 +128,7 @@ jobs:
             C:\Program Files\NASM
             C:\Program Files\Meson
 
-      - name: Set up build envMSVC: Experiment with GitHub action (30)ironment (windows, cached)
+      - name: Set up build environment (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages
         run: |
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'

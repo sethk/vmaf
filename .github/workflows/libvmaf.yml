@@ -98,9 +98,6 @@ jobs:
           brew install -q ninja nasm ccache llvm
           echo "PATH=$(brew --prefix)/opt/llvm/bin:$PATH" >> $GITHUB_ENV
 
-      - name: Restore Visual Studio from cache (windows, cached)
-        if: matrix.os == 'windows-latest' && matrix.cache_packages
-
       - name: Restore Chocolatey dependencies (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages
         id: restore-choco-deps

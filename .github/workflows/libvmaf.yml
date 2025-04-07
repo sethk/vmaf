@@ -12,23 +12,27 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            cc: gcc
-            cxx: g++
-            sudo: sudo
-            ccache: ccache
           #- os: ubuntu-latest
-          #  CC: ccache gcc-9
-          #  CXX: ccache g++-9
+          #  cc: gcc
+          #  cxx: g++
+          #  sudo: sudo
+          #  ccache: ccache
           #- os: ubuntu-latest
-          #  CC: ccache clang
-          #  CXX: ccache clang++
-          - os: macos-latest
-            cc: clang
-            cxx: clang++
-            sudo: sudo
-            ccache: ccache
-            experimental: true
+          #  cc: ccache gcc-9
+          #  cxx: ccache g++-9
+          #  sudo: sudo
+          #  ccache: ccache
+          #- os: ubuntu-latest
+          #  cc: ccache clang
+          #  cxx: ccache clang++
+          #  sudo: sudo
+          #  ccache: ccache
+          #- os: macos-latest
+          #  cc: clang
+          #  cxx: clang++
+          #  sudo: sudo
+          #  ccache: ccache
+          #  experimental: true
           - os: windows-latest
             cc: cl
             cxx: cl
@@ -99,7 +103,7 @@ jobs:
         id: restore-choco-deps
         uses: actions/cache/restore@v4
         with:
-          key: ${{ runner.os }}-deps-choco-${{ hashFiles('.github/actions/choco/windows-vs2022.config') }}-1
+          key: ${{ runner.os }}-deps-choco-${{ hashFiles('.github/choco/windows-vs2022.config') }}-1
           path: |
             C:\Program Files (x86)
             C:\Program Files
@@ -113,7 +117,7 @@ jobs:
         if: matrix.os == 'windows-latest' && matrix.cache_packages && steps.restore-choco-deps.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          key: ${{ steps.restore-deps.outputs.cache-primary-key }}
+          key: ${{ steps.restore-choco-deps.outputs.cache-primary-key }}
           path: |
             C:\Program Files (x86)
             C:\Program Files

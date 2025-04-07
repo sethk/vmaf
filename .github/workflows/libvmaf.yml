@@ -106,6 +106,7 @@ jobs:
 
       - name: Install Chocolatey dependencies (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages == 'true' && ${{ steps.restore-choco-deps.outputs.cache-hit != 'true' }}
+        run: |
           & choco install visualstudio2022buildtools visualstudio2022-workload-vctools windows-sdk-10.0 meson nasm -y -r
 
       - name: Save Chocolatey dependencies (windows, cached)

@@ -192,6 +192,7 @@ jobs:
           ninja -vC libvmaf/build
       - name: Run tests
         run: |
+          ldd libvmaf\build\test\test_thread_pool.exe
           ninja -vC libvmaf/build test
       - name: Install
         run: |

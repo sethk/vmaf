@@ -107,7 +107,8 @@ jobs:
           path: |
             #C:\Program Files (x86)\Microsoft Visual Studio
             #C:\Program Files\Microsoft Visual Studio
-            C:\Program Files (x86)\Windows Kits
+            C:\Program Files (x86)\Windows Kits\10\Lib\*
+            C:\Program Files (x86)\Windows Kits\10\Include\*
             C:\Program Files\NASM
             C:\Program Files\Meson
 
@@ -124,7 +125,8 @@ jobs:
           path: |
             #C:\Program Files (x86)\Microsoft Visual Studio
             #C:\Program Files\Microsoft Visual Studio
-            C:\Program Files (x86)\Windows Kits
+            C:\Program Files (x86)\Windows Kits\10\Lib\*
+            C:\Program Files (x86)\Windows Kits\10\Include\*
             C:\Program Files\NASM
             C:\Program Files\Meson
 
@@ -187,20 +189,28 @@ jobs:
       - name: Configure
         run: |
           meson setup libvmaf libvmaf/build --buildtype release --prefix $PWD/install -Denable_float=true
+
       - name: Build
         run: |
           ninja -vC libvmaf/build
+
       - name: Run tests
         run: |
-          ldd libvmaf\build\test\test_thread_pool.exe
-          & .\libvmaf\build\test\test_thread_pool.exe
           ninja -vC libvmaf/build test
+
+      - name: Dump test log if tests failed
+        if: steps.run_tests.outcome == 'failure'
+        run: |
+          cat libvmaf/build/meson-logs/testlog.txt
+
       - name: Install
         run: |
           ${{ matrix.sudo }} ninja -vC libvmaf/build install
+
       - name: Set up tox
         run: |
           pip install tox
+
       - name: Run tox tests
         run: |
           tox -c python
@@ -217,6 +227,7 @@ jobs:
         with:
           name: ${{ matrix.os }}-${{ matrix.cc }}-vmaf
           path: ${{ steps.get_info.outputs.path }}
+
       - name: Upload vmaf
         if: steps.get_info.outputs.upload_url != 'null'
         uses: actions/upload-release-asset@v1

@@ -114,7 +114,7 @@ jobs:
       - name: Install Chocolatey dependencies (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages && steps.restore-choco-deps.outputs.cache-hit != 'true'
         run: |
-          & choco .github\choco\windows-vs2022.config -y -r
+          & choco .\.github\choco\windows-vs2022.config -y -r
 
       - name: Save Chocolatey dependencies (windows, cached)
         if: matrix.os == 'windows-latest' && matrix.cache_packages && steps.restore-choco-deps.outputs.cache-hit != 'true'

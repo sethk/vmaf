@@ -194,6 +194,12 @@ jobs:
         run: |
           ninja -vC libvmaf/build
 
+      - name: Upload build output for diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-${{ matrix.cc }}-vmaf-build
+          path: ./libvmaf/build
+
       - name: Run tests
         run: |
           ninja -vC libvmaf/build test

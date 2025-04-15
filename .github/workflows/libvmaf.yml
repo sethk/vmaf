@@ -195,13 +195,16 @@ jobs:
           ninja -vC libvmaf/build
 
       - name: Upload build output for diagnostics
+        if: matrix.os == 'windows-latest' && !matrix.cache_packages
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-${{ matrix.cc }}-vmaf-build
           path: ./libvmaf/build
 
       - name: Run tests
+        id: run_tests
         run: |
+          ldd libvmaf/build/test/test_feature_collector
           ninja -vC libvmaf/build test
 
       - name: Dump test log if tests failed

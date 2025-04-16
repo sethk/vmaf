@@ -41,14 +41,14 @@ jobs:
             cache_packages: false
             sudo:
             ccache:
-          - os: windows-latest
-            cc: cl
-            cxx: cl
-            msvc_version: 14.43.34808
-            win_sdk_version: 10.0.22000.0
-            cache_packages: true
-            sudo:
-            ccache:
+          #- os: windows-latest
+          #  cc: cl
+          #  cxx: cl
+          #  msvc_version: 14.43.34808
+          #  win_sdk_version: 10.0.22000.0
+          #  cache_packages: true
+          #  sudo:
+          #  ccache:
 
     env:
       CC: ${{ matrix.ccache }} ${{ matrix.cc }}
@@ -161,6 +161,7 @@ jobs:
       - name: Install dependencies (windows, uncached)
         if: matrix.os == 'windows-latest' && !matrix.cache_packages
         run: |
+          gci 'C:\Program Files\Microsoft Visual Studio\2022'
           & choco install visualstudio2022buildtools visualstudio2022-workload-vctools windows-sdk-10.0 meson nasm -y -r
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
           $VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
@@ -208,7 +209,7 @@ jobs:
           ninja -vC libvmaf/build test
 
       - name: Dump test log if tests failed
-        if: steps.run_tests.outcome == 'failure'
+        if: failure() && steps.run_tests.outcome == 'failure'
         run: |
           cat libvmaf/build/meson-logs/testlog.txt
 

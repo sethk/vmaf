@@ -163,7 +163,7 @@ jobs:
           & choco install windows-sdk-10.0 meson nasm -y -r
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
           $VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          gci "$VSDir\VC\Tools\MSVC\'
+          gci "$VSDir\VC\Tools\MSVC\"
           $MSVCDir = "$VSDir\VC\Tools\MSVC\${{ matrix.msvc_version }}"
           $MSVCBinDir = "$MSVCDir\bin\Hostx64\x64"
           $Env:PATH = "C:\Program Files\Meson;C:\Program Files\NASM;$MSVCBinDir;$Env:PATH"

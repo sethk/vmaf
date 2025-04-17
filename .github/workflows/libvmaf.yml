@@ -36,16 +36,12 @@ jobs:
           - os: windows-latest
             cc: cl
             cxx: cl
-            msvc_version: 14.43.34808
-            win_sdk_version: 10.0.22000.0
             cache_packages: false
             sudo:
             ccache:
           #- os: windows-latest
           #  cc: cl
           #  cxx: cl
-          #  msvc_version: 14.43.34808
-          #  win_sdk_version: 10.0.22000.0
           #  cache_packages: true
           #  sudo:
           #  ccache:
@@ -132,17 +128,18 @@ jobs:
           & choco install visualstudio2022buildtools visualstudio2022-workload-vctools -y -r
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
           $VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          $MSVCDir = "$VSDir\VC\Tools\MSVC\${{ matrix.msvc_version }}"
+          $MSVCVersion = Get-Content "$VSDir\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt"
+          $MSVCDir = "$VSDir\VC\Tools\MSVC\$MSVCVersion"
           $MSVCBinDir = "$MSVCDir\bin\Hostx64\x64"
           $Env:PATH = "C:\Program Files\Meson;C:\Program Files\NASM;$MSVCBinDir;$Env:PATH"
           $Env:LIB = "$MSVCDir\lib\x64"
           $Env:INCLUDE = "$MSVCDir\include"
           $Win10SDKDir = "C:\Program Files (x86)\Windows Kits\10"
-          $Env:LIB += ";$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}\um\x64"
-          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\um"
-          $Env:LIB += ";$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}\ucrt\x64"
-          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\ucrt"
-          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\shared"
+          $Env:LIB += ";$Win10SDKDir\Lib\$Win10SDKVer\um\x64"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\$Win10SDKVer\um"
+          $Env:LIB += ";$Win10SDKDir\Lib\$Win10SDKVer\ucrt\x64"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\$Win10SDKVer\ucrt"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\$Win10SDKVer\shared"
           Invoke-WebRequest -OutFile pthreads-win32.zip -Uri 'http://mirrors.kernel.org/sourceware/pthreads-win32/pthreads-w32-2-9-1-release.zip'
           $PThreadsPrefix = 'C:\Program Files\pthreads-win32'
           Expand-Archive -Path pthreads-win32.zip -Destination $PThreadsPrefix
@@ -157,23 +154,26 @@ jobs:
       - name: Install dependencies (windows, uncached)
         if: matrix.os == 'windows-latest' && !matrix.cache_packages
         run: |
-          Get-ChildItem -Recurse -Filter 'Windows Kits' 'C:\Program Files' -ErrorAction Continue
-          Get-ChildItem -Recurse -Filter 'Windows Kits' 'C:\Program Files (x86)' -ErrorAction Continue
-          & choco install windows-sdk-10.0 meson nasm -y -r
+          '{"name": "my-project","version": "0.1.0","builtin-baseline": "05e7272c8dd64ff0e37a3ab40697e7e6d1e48df1","dependencies": ["pthreads"]}" | Set-Content vcpkg.json
+          vcpkg install
+          & choco install meson nasm -y -r
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
           $VSDir = & $VSWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          Get-ChildItem "$VSDir\VC\Tools\MSVC\" -ErrorAction Continue
-          $MSVCDir = "$VSDir\VC\Tools\MSVC\${{ matrix.msvc_version }}"
+          $MSVCVersion = Get-Content "$VSDir\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt"
+          $MSVCDir = "$VSDir\VC\Tools\MSVC\$MSVCVersion"
           $MSVCBinDir = "$MSVCDir\bin\Hostx64\x64"
           $Env:PATH = "C:\Program Files\Meson;C:\Program Files\NASM;$MSVCBinDir;$Env:PATH"
           $Env:LIB = "$MSVCDir\lib\x64"
           $Env:INCLUDE = "$MSVCDir\include"
+          $kitsRoot = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows Kits\Installed Roots").KitsRoot10
+          $latestSdk = Get-ChildItem "$kitsRoot\Include" | Sort-Object Name -Descending | Select-Object -First 1
+          $Win10SDKVer = $latestSdk.Name
           $Win10SDKDir = "C:\Program Files (x86)\Windows Kits\10"
-          $Env:LIB += ";$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}\um\x64"
-          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\um"
-          $Env:LIB += ";$Win10SDKDir\Lib\${{ matrix.win_sdk_version }}\ucrt\x64"
-          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\ucrt"
-          $Env:INCLUDE+= ";$Win10SDKDir\Include\${{ matrix.win_sdk_version }}\shared"
+          $Env:LIB += ";$Win10SDKDir\Lib\$Win10SDKVer\um\x64"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\$Win10SDKVer\um"
+          $Env:LIB += ";$Win10SDKDir\Lib\$Win10SDKVer\ucrt\x64"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\$Win10SDKVer\ucrt"
+          $Env:INCLUDE+= ";$Win10SDKDir\Include\$Win10SDKVer\shared"
           Invoke-WebRequest -OutFile pthreads-win32.zip -Uri 'http://mirrors.kernel.org/sourceware/pthreads-win32/pthreads-w32-2-9-1-release.zip'
           $PThreadsPrefix = 'C:\Program Files\pthreads-win32'
           Expand-Archive -Path pthreads-win32.zip -Destination $PThreadsPrefix

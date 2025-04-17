@@ -154,7 +154,8 @@ jobs:
       - name: Install dependencies (windows, uncached)
         if: matrix.os == 'windows-latest' && !matrix.cache_packages
         run: |
-          '{"name": "my-project","version": "0.1.0","builtin-baseline": "05e7272c8dd64ff0e37a3ab40697e7e6d1e48df1","dependencies": ["pthreads"]}' | Set-Content vcpkg.json
+          '{"name": "libvmaf-deps","version": "0.0.1","dependencies": ["pthreads"]}' | Set-Content vcpkg.json
+          vcpkg x-update-baseline
           vcpkg install
           & choco install meson nasm -y -r
           $VSWhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
@@ -167,7 +168,7 @@ jobs:
           $Env:LIB = "$MSVCDir\lib\x64"
           $Env:INCLUDE = "$MSVCDir\include"
           $kitsRoot = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows Kits\Installed Roots").KitsRoot10
-          $latestSdk = Get-ChildItem "$kitsRoot\Include" | Sort-Object Name -Descending | Select-Object -First 1
+          $latestSdk = Get-ChildItem "$kitsRoot\Include" -Filter '10.*' | Sort-Object Name -Descending | Select-Object -First 1
           $Win10SDKVer = $latestSdk.Name
           Write-Host "Using Windows 10 SDK $Win10SDKVer"
           $Win10SDKDir = "C:\Program Files (x86)\Windows Kits\10"

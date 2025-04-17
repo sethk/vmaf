@@ -17,27 +17,32 @@ jobs:
             cxx: g++
             sudo: sudo
             ccache: ccache
+            ldd: ldd
           - os: ubuntu-latest
-            cc: ccache gcc-9
-            cxx: ccache g++-9
+            cc: gcc-9
+            cxx: g++-9
             sudo: sudo
             ccache: ccache
+            ldd: ldd
           - os: ubuntu-latest
-            cc: ccache clang
-            cxx: ccache clang++
+            cc: clang
+            cxx: clang++
             sudo: sudo
             ccache: ccache
+            ldd: ldd
           - os: macos-latest
             cc: clang
             cxx: clang++
             sudo: sudo
             ccache: ccache
+            ldd: otool -L
             experimental: true
           - os: windows-latest
             cc: cl
             cxx: cl
             sudo:
             ccache:
+            ldd: ldd
 
     env:
       CC: ${{ matrix.ccache }} ${{ matrix.cc }}
@@ -63,23 +68,23 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo -E apt-get -yq install ccache ninja-build libomp-dev
+          sudo -E apt-get -yq install ccache ninja-build nasm libomp-dev
 
       - name: Install gcc (ubuntu)
         if: matrix.os == 'ubuntu-latest' && matrix.cc == 'gcc'
         run: |
-          sudo -E apt-get -yq install gcc g++ nasm
+          sudo -E apt-get -yq install gcc g++
 
       - name: Install gcc-9 (ubuntu)
         if: matrix.os == 'ubuntu-latest' && matrix.cc == 'gcc-9'
         run: |
           sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
-          sudo -E apt-get -yq install gcc-9 g++-9 nasm
+          sudo -E apt-get -yq install gcc-9 g++-9
 
       - name: Install clang (ubuntu)
         if: matrix.os == 'ubuntu-latest' && matrix.cc == 'clang'
         run: |
-          sudo -E apt-get -yq install clang nasm
+          sudo -E apt-get -yq install clang
 
       - name: Install dependencies (mac)
         if: matrix.os == 'macos-latest'
@@ -142,7 +147,6 @@ jobs:
       - name: Run tests
         id: run_tests
         run: |
-          ldd libvmaf/build/test/test_feature_collector
           ninja -vC libvmaf/build test
 
       - name: Dump test log if tests failed
@@ -155,18 +159,20 @@ jobs:
         run: |
           ${{ matrix.sudo }} ninja -vC libvmaf/build install
 
-      - name: Set up tox
+      - name: Set up tox (non-windows)
+        if: matrix.os != 'windows-latest'
         run: |
           pip install tox
 
-      - name: Run tox tests
+      - name: Run tox tests (non-windows)
+        if: matrix.os != 'windows-latest'
         run: |
           tox -c python
 
       - name: Get binary path & Current Release
         id: get_info
         run: |
-          ldd "./install/bin/vmaf" || true
+          ${{ matrix.ldd }} ./install/bin/vmaf
           echo "path=./install/bin/vmaf" >> $GITHUB_OUTPUT
           echo "upload_url=$(curl -L https://api.github.com/repos/${{ github.repository }}/releases/tags/$(cut -d/ -f3 <<< ${{ github.ref }}) | jq -r ."upload_url")" >> $GITHUB_OUTPUT
 

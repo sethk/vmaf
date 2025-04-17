@@ -169,7 +169,8 @@ jobs:
         run: |
           tox -c python
 
-      - name: Get binary path & Current Release
+      - name: Get binary path & Current Release (non-windows)
+        if: matrix.os != 'windows-latest'
         id: get_info
         run: |
           ${{ matrix.ldd }} ./install/bin/vmaf

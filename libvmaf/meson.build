@@ -53,8 +53,7 @@ if cc.has_header('stdatomic.h', args: test_args)
             error('stdatomic.h exists but could not be made usable under MSVC with /experimental:c11atomics')
         endif
 
-        add_project_arguments('/experimental:c11atomics', language: 'c')
-        stdatomic_dependency = declare_dependency(compile_args: '-DHAVE_STDATOMIC_H')
+        add_project_arguments(['/experimental:c11atomics', '-DHAVE_STDATOMIC_H'], language: 'c')
     else
         error('stdatomic.h was found but is not usable for some reason; check whether the compiler needs extension flags')
     endif
@@ -89,7 +88,7 @@ if cc.has_type('struct timespec', prefix: '#include <time.h>')
     # Used by pthreads-win32 <pthread.h>
     add_project_arguments('-DHAVE_STRUCT_TIMESPEC', language: ['c', 'cpp'])
 endif
-if cc.has_type('mode_t', prefix: '#include <sys/types.h>')
+if cc.has_type('mode_t', prefix: 'include <sys/types.h>')
     add_project_arguments('-DHAVE_MODE_T', language: ['c', 'cpp'])
 endif
 
